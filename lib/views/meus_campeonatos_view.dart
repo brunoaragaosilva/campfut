@@ -12,7 +12,11 @@ class _MeusCampeonatosViewState extends State<MeusCampeonatosView> {
   List<Map<String, dynamic>> campeonatos = [];
 
   void _abrirModalNovoCampeonato() {
-    NovoCampeonatoModal.exibir(context);
+    NovoCampeonatoModal.exibir(context, (novo) {
+      setState(() {
+        campeonatos.add(novo);
+      });
+    });
   }
 
   @override
@@ -116,13 +120,13 @@ class _MeusCampeonatosViewState extends State<MeusCampeonatosView> {
                       ),
                     ),
                     subtitle: Text(
-                      item['descricao'] ?? '',
+                      item['descricao'] ?? item['modalidade'] ?? '',
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.6),
                       ),
                     ),
                     trailing: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: Center,
                       children: [
                         const Icon(
                           Icons.copy,
@@ -131,7 +135,7 @@ class _MeusCampeonatosViewState extends State<MeusCampeonatosView> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${item['seguidores'] ?? 0} seguidores',
+                          '${item['seguidores'] ?? 1} seguidores',
                           style: const TextStyle(
                             color: Colors.white54,
                             fontSize: 10,
