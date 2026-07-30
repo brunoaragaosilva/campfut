@@ -9,22 +9,10 @@ class MeusCampeonatosView extends StatefulWidget {
 }
 
 class _MeusCampeonatosViewState extends State<MeusCampeonatosView> {
-  // Lista inicial limpa (sem o campeonato de exemplo)
   List<Map<String, dynamic>> campeonatos = [];
 
-  void _abrirNovoCampeonato() async {
-    final novoCampeonato = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const NovoCampeonatoView(),
-      ),
-    );
-
-    if (novoCampeonato != null && novoCampeonato is Map<String, dynamic>) {
-      setState(() {
-        campeonatos.add(novoCampeonato);
-      });
-    }
+  void _abrirModalNovoCampeonato() {
+    NovoCampeonatoModal.exibir(context);
   }
 
   @override
@@ -61,7 +49,7 @@ class _MeusCampeonatosViewState extends State<MeusCampeonatosView> {
           const SizedBox(height: 16),
           Center(
             child: ElevatedButton(
-              onPressed: _abrirNovoCampeonato,
+              onPressed: _abrirModalNovoCampeonato,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF00C853),
                 shape: RoundedRectangleBorder(
@@ -121,7 +109,7 @@ class _MeusCampeonatosViewState extends State<MeusCampeonatosView> {
                       ),
                     ),
                     title: Text(
-                      item['nome'] ?? 'Campeonato',
+                      item['nome'] ?? '',
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
