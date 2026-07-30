@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'cadastro_campeonato_unico_view.dart';
 
 class NovoCampeonatoModal {
-  static void exibir(BuildContext context) {
+  // Modal 1: Escolha entre Único ou Com Categorias
+  static void exibir(BuildContext context, Function(Map<String, dynamic>) onCampeonatoCriado) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -18,8 +20,8 @@ class NovoCampeonatoModal {
                 // Opção 1: Campeonato Único
                 InkWell(
                   onTap: () {
-                    Navigator.pop(context);
-                    // Lógica para ir para a tela de criação de campeonato único
+                    Navigator.pop(context); // Fecha o primeiro modal
+                    exibirSelecaoModalidade(context, onCampeonatoCriado); // Abre seleção de modalidade
                   },
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,7 +69,6 @@ class NovoCampeonatoModal {
                 InkWell(
                   onTap: () {
                     Navigator.pop(context);
-                    // Lógica para ir para a tela de criação de campeonato com categorias
                   },
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,6 +104,99 @@ class NovoCampeonatoModal {
                         ),
                       ),
                     ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Modal 2: Seleção da Modalidade (estilo CopaFácil)
+  static void exibirSelecaoModalidade(
+      BuildContext context, Function(Map<String, dynamic>) onCampeonatoCriado) {
+
+    final List<Map<String, dynamic>> modalidades = [
+      {'nome': 'Futsal', 'icon': Icons.sports_soccer, 'color': Colors.indigo},
+      {'nome': 'Futebol', 'icon': Icons.sports_soccer, 'color': Colors.green},
+      {'nome': 'Futebol 7', 'icon': Icons.sports_soccer, 'color': Colors.green.shade700},
+      {'nome': 'Handebol', 'icon': Icons.sports_handball, 'color': Colors.orange.shade800},
+      {'nome': 'Basquetebol', 'icon': Icons.sports_basketball, 'color': Colors.deepOrange},
+      {'nome': 'Vôlei', 'icon': Icons.sports_volleyball, 'color': Colors.blue},
+      {'nome': 'Vôlei de Praia', 'icon': Icons.beach_access, 'color': Colors.blue.shade800},
+      {'nome': 'Tênis de Mesa', 'icon': Icons.sports_tennis, 'color': Colors.purple},
+      {'nome': 'Tênis', 'icon': Icons.sports_tennis, 'color': Colors.lightGreen},
+      {'nome': 'Beach Tennis', 'icon': Icons.sports_tennis, 'color': Colors.teal},
+      {'nome': 'Xadrez', 'icon': Icons.extension, 'color': Colors.blueGrey},
+      {'nome': 'Atletismo', 'icon': Icons.directions_run, 'color': Colors.amber.shade800},
+      {'nome': 'Esporte Genérico', 'icon': Icons.emoji_events, 'color': Colors.deepOrange.shade300},
+    ];
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Container(
+            height: MediaQuery.of(context).size.height * 0.75,
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  child: Text(
+                    'Selecione a modalidade',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+                const Divider(),
+                Expanded(
+                  child: ListView.separated(
+                    itemCount: modalidades.length,
+                    separatorBuilder: (context, index) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final item = modalidades[index];
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: (item['color'] as Color).withOpacity(0.15),
+                          child: Icon(
+                            item['icon'] as IconData,
+                            color: item['color'] as Color,
+                          ),
+                        ),
+                        title: Text(
+                          item['nome'] as String,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        onTap: () async {
+                          Navigator.pop(context);
+                          final resultado = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CadastroCampeonatoUnicoView(
+                                modalidadeSelecionada: item['nome'] as String,
+                              ),
+                            ),
+                          );
+                          if (resultado != null) {
+                            onCampeonatoCriado(resultado);
+                          }
+                        },
+                      );
+                    },
                   ),
                 ),
               ],
