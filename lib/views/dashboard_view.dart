@@ -1,165 +1,155 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
-import '../models/campeonato_models.dart';
-import 'campeonato_detalhes_view.dart';
+import 'novo_campeonato.dart';
+import 'meus_campeonatos_view.dart';
 
-class DashboardView extends StatefulWidget {
-  const DashboardView({super.key});
-
-  @override
-  State<DashboardView> createState() => _DashboardViewState();
-}
-
-class _DashboardViewState extends State<DashboardView> {
-  List<Campeonato> campeonatos = [];
-  final uuid = const Uuid();
-  final TextEditingController _nomeController = TextEditingController();
-  FormatoCampeonato _formatoSelecionado = FormatoCampeonato.pontosCorridos;
-
-  @override
-  void initState() {
-    super.initState();
-    _carregarCampeonatos();
-  }
-
-  Future<void> _carregarCampeonatos() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? cString = prefs.getString('campeonatos_list');
-    if (cString != null) {
-      final List decoded = jsonDecode(cString);
-      setState(() {
-        campeonatos = decoded.map((e) => Campeonato.fromMap(e)).toList();
-      });
-    }
-  }
-
-  Future<void> _salvarCampeonatos() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('campeonatos_list', jsonEncode(campeonatos.map((e) => e.toMap()).toList()));
-  }
-
-  void _exibirCriarCampeonato() {
-    _nomeController.clear();
-    _formatoSelecionado = FormatoCampeonato.pontosCorridos;
-
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text("Novo Campeonato", style: TextStyle(fontWeight: FontWeight.bold)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _nomeController,
-                decoration: const InputDecoration(labelText: "Nome do Torneio", border: OutlineInputBorder()),
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<FormatoCampeonato>(
-                value: _formatoSelecionado,
-                decoration: const InputDecoration(labelText: "Formato de Disputa", border: OutlineInputBorder()),
-                items: const [
-                  DropdownMenuItem(value: FormatoCampeonato.pontosCorridos, child: Text("Pontos Corridos")),
-                  DropdownMenuItem(value: FormatoCampeonato.mataMata, child: Text("Apenas Mata-Mata")),
-                  DropdownMenuItem(value: FormatoCampeonato.misto, child: Text("Pontos Corridos + Mata-Mata")),
-                ],
-                onChanged: (val) {
-                  if (val != null) setDialogState(() => _formatoSelecionado = val);
-                },
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancelar", style: TextStyle(color: Colors.grey))),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F172A)),
-              onPressed: () {
-                if (_nomeController.text.trim().isNotEmpty) {
-                  setState(() {
-                    campeonatos.add(Campeonato(
-                      id: uuid.v4(),
-                      nome: _nomeController.text.trim(),
-                      formato: _formatoSelecionado,
-                    ));
-                  });
-                  _salvarCampeonatos();
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text("Criar", style: TextStyle(color: Colors.white)),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+class DashboardView extends StatelessWidget {
+  const DashboardView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0F172A),
-        title: const Text("MEUS CAMPEONATOS", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18)),
-        centerTitle: true,
-      ),
-      body: campeonatos.isEmpty
-          ? const Center(child: Text("Nenhum campeonato criado ainda.\nToque no '+' para começar!", textAlign: TextAlign.center, style: TextStyle(color: Colors.blueGrey, fontSize: 16)))
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: campeonatos.length,
-              itemBuilder: (context, index) {
-                final c = campeonatos[index];
-                String formatoTexto = "Pontos Corridos";
-                IconData formatoIcone = Icons.emoji_events;
-                if (c.formato == FormatoCampeonato.mataMata) {
-                  formatoTexto = "Mata-Mata Puro";
-                  formatoIcone = Icons.account_tree;
-                } else if (c.formato == FormatoCampeonato.misto) {
-                  formatoTexto = "Grupos + Mata-Mata";
-                  formatoIcone = Icons.flash_on;
-                }
+      backgroundColor: const Color(0xFF0F172A), // Fundo escuro elegante da Dashboard
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Logo do CAMPFUT
+                Image.asset(
+                  'assets/images/logo_campfut.png',
+                  height: 160,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(
+                      Icons.emoji_events,
+                      size: 100,
+                      color: Colors.amber,
+                    );
+                  },
+                ),
+                const SizedBox(height: 24),
 
-                return Card(
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  elevation: 2,
-                  child: ListTile(
-                    leading: CircleAvatar(backgroundColor: const Color(0xFFFEF3C7), child: Icon(formatoIcone, color: const Color(0xFFD97706))),
-                    title: Text(c.nome, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    subtitle: Text(formatoTexto, style: const TextStyle(color: Colors.blueGrey)),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                          onPressed: () {
-                            setState(() => campeonatos.removeAt(index));
-                            _salvarCampeonatos();
-                          },
-                        ),
-                      ],
+                // Título Principal
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: const TextSpan(
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      height: 1.3,
                     ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => CampeonatoDetalhesView(campeonato: c)),
-                      );
-                    },
+                    children: [
+                      TextSpan(text: 'GESTÃO DE '),
+                      TextSpan(
+                        text: 'ESPORTES\n',
+                        style: TextStyle(fontStyle: FontStyle.italic),
+                      ),
+                      TextSpan(text: 'COM ENTRETENIMENTO E '),
+                      TextSpan(
+                        text: 'LAZER',
+                        style: TextStyle(fontStyle: FontStyle.italic),
+                      ),
+                    ],
                   ),
-                );
-              },
+                ),
+                const SizedBox(height: 32),
+
+                // Botão "CRIAR CAMPEONATO" Integrado
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      NovoCampeonatoModal.exibir(context, (novoCampeonato) {
+                        // Após criar o campeonato, navega para a lista de "Meus Campeonatos"
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const MeusCampeonatosView(),
+                          ),
+                        );
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF00C853),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(27),
+                      ),
+                      elevation: 4,
+                    ),
+                    child: const Text(
+                      'CRIAR CAMPEONATO',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+
+                // Subtítulo de Funcionalidades
+                const Text(
+                  'ORGANIZAÇÃO - TÁTICA - REGRAS - ADMINISTRAÇÃO',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.1,
+                  ),
+                ),
+                const SizedBox(height: 40),
+
+                // Seção de Patrocínio
+                const Text(
+                  'PATROCÍNIO',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Cards de Patrocinadores
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(4, (index) {
+                    return Expanded(
+                      child: Container(
+                        height: 50,
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Center(
+                          child: Text(
+                            'PATROCÍNIO',
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ],
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _exibirCriarCampeonato,
-        backgroundColor: const Color(0xFF0F172A),
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.add),
+          ),
+        ),
       ),
     );
   }
 }
-
