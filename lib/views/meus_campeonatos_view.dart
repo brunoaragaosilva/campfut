@@ -126,7 +126,7 @@ class _MeusCampeonatosViewState extends State<MeusCampeonatosView> {
                       ),
                     ),
                     trailing: Column(
-                      mainAxisAlignment: Center,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Icon(
                           Icons.copy,
