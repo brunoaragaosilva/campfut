@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'views/app_drawer.dart';
+import 'views/novo_campeonato.dart';
+import 'views/meus_campeonatos_view.dart';
 
 void main() {
   runApp(const CampFutApp());
@@ -204,9 +206,18 @@ class HomeView extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
 
-                // BOTÃO CRIAR CAMPEONATO
+                // BOTÃO CRIAR CAMPEONATO (CONECTADO)
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    NovoCampeonatoModal.exibir(context, (novoCampeonato) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const MeusCampeonatosView(),
+                        ),
+                      );
+                    });
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF10B981),
                     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
