@@ -22,9 +22,9 @@ class _MeusCampeonatosViewState extends State<MeusCampeonatosView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: const Color(0xFFF1F5F9), // Fundo claro e limpo
       appBar: AppBar(
-        backgroundColor: const Color(0xFF00C853),
+        backgroundColor: const Color(0xFF2E7D32),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -55,7 +55,7 @@ class _MeusCampeonatosViewState extends State<MeusCampeonatosView> {
             child: ElevatedButton(
               onPressed: _abrirModalNovoCampeonato,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF00C853),
+                backgroundColor: const Color(0xFF2E7D32),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
@@ -77,11 +77,11 @@ class _MeusCampeonatosViewState extends State<MeusCampeonatosView> {
           const SizedBox(height: 24),
           Expanded(
             child: campeonatos.isEmpty
-                ? Center(
+                ? const Center(
               child: Text(
                 'Nenhum campeonato criado ainda.',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.6),
+                  color: Colors.black54,
                   fontSize: 16,
                 ),
               ),
@@ -94,35 +94,39 @@ class _MeusCampeonatosViewState extends State<MeusCampeonatosView> {
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E293B),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.1),
-                    ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      )
+                    ],
                   ),
                   child: ListTile(
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF00C853).withOpacity(0.2),
+                        color: const Color(0xFF2E7D32).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: const Icon(
                         Icons.emoji_events,
-                        color: Color(0xFF00C853),
+                        color: Color(0xFF2E7D32),
                       ),
                     ),
                     title: Text(
                       item['nome'] ?? '',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: Colors.black87,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     subtitle: Text(
                       item['descricao'] ?? item['modalidade'] ?? '',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.6),
+                      style: const TextStyle(
+                        color: Colors.black54,
                       ),
                     ),
                     trailing: Column(
@@ -130,14 +134,14 @@ class _MeusCampeonatosViewState extends State<MeusCampeonatosView> {
                       children: [
                         const Icon(
                           Icons.copy,
-                          color: Colors.white54,
+                          color: Colors.black45,
                           size: 18,
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '${item['seguidores'] ?? 1} seguidores',
                           style: const TextStyle(
-                            color: Colors.white54,
+                            color: Colors.black45,
                             fontSize: 10,
                           ),
                         ),

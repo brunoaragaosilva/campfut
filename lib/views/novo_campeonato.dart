@@ -8,6 +8,7 @@ class NovoCampeonatoModal {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
+          backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -39,16 +40,16 @@ class NovoCampeonatoModal {
                             Text(
                               'Campeonato único',
                               style: TextStyle(
-                                fontSize: 20,
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black,
+                                color: Colors.black87,
                               ),
                             ),
                             SizedBox(height: 4),
                             Text(
                               'Campeonato de uma única modalidade com apenas 1 categoria',
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: 13,
                                 color: Colors.black54,
                                 height: 1.3,
                               ),
@@ -86,16 +87,16 @@ class NovoCampeonatoModal {
                             Text(
                               'Campeonato com categorias',
                               style: TextStyle(
-                                fontSize: 20,
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black,
+                                color: Colors.black87,
                               ),
                             ),
                             SizedBox(height: 4),
                             Text(
                               'Campeonato com mais de uma categoria. Ex: divisões por idade, masculino/feminino, diferentes esportes ou outras categorias',
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: 13,
                                 color: Colors.black54,
                                 height: 1.3,
                               ),
@@ -114,7 +115,7 @@ class NovoCampeonatoModal {
     );
   }
 
-  // Modal 2: Seleção da Modalidade (estilo CopaFácil)
+  // Modal 2: Seleção da Modalidade (estilo CopaFácil, fundo claro e textos bem legíveis)
   static void exibirSelecaoModalidade(
       BuildContext context, Function(Map<String, dynamic>) onCampeonatoCriado) {
 
@@ -138,12 +139,13 @@ class NovoCampeonatoModal {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
+          backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
           child: Container(
             height: MediaQuery.of(context).size.height * 0.75,
-            padding: const EdgeInsets.symmetric(vertical: 20),
+            padding: const EdgeInsets.symmetric(vertical: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -152,17 +154,17 @@ class NovoCampeonatoModal {
                   child: Text(
                     'Selecione a modalidade',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
                     ),
                   ),
                 ),
-                const Divider(),
+                const Divider(color: Colors.black12),
                 Expanded(
                   child: ListView.separated(
                     itemCount: modalidades.length,
-                    separatorBuilder: (context, index) => const Divider(height: 1),
+                    separatorBuilder: (context, index) => const Divider(height: 1, color: Colors.black12),
                     itemBuilder: (context, index) {
                       final item = modalidades[index];
                       return ListTile(
@@ -171,12 +173,13 @@ class NovoCampeonatoModal {
                           child: Icon(
                             item['icon'] as IconData,
                             color: item['color'] as Color,
+                            size: 20,
                           ),
                         ),
                         title: Text(
                           item['nome'] as String,
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: 15,
                             fontWeight: FontWeight.w600,
                             color: Colors.black87,
                           ),
