@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'novo_campeonato.dart';
 
 class MeusCampeonatosView extends StatefulWidget {
   const MeusCampeonatosView({Key? key}) : super(key: key);
@@ -8,12 +9,22 @@ class MeusCampeonatosView extends StatefulWidget {
 }
 
 class _MeusCampeonatosViewState extends State<MeusCampeonatosView> {
-  // Lista inicial vazia sem o campeonato de exemplo
-  List<ChampionshipItem> championships = [];
+  // Lista inicial limpa (sem o campeonato de exemplo)
+  List<Map<String, dynamic>> campeonatos = [];
 
-  void _createNewChampionship() {
-    // Abre a tela de novo campeonato
-    Navigator.pushNamed(context, '/novo_campeonato');
+  void _abrirNovoCampeonato() async {
+    final novoCampeonato = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const NovoCampeonatoView(),
+      ),
+    );
+
+    if (novoCampeonato != null && novoCampeonato is Map<String, dynamic>) {
+      setState(() {
+        campeonatos.add(novoCampeonato);
+      });
+    }
   }
 
   @override
@@ -50,7 +61,7 @@ class _MeusCampeonatosViewState extends State<MeusCampeonatosView> {
           const SizedBox(height: 16),
           Center(
             child: ElevatedButton(
-              onPressed: _createNewChampionship,
+              onPressed: _abrirNovoCampeonato,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF00C853),
                 shape: RoundedRectangleBorder(
@@ -73,7 +84,7 @@ class _MeusCampeonatosViewState extends State<MeusCampeonatosView> {
           ),
           const SizedBox(height: 24),
           Expanded(
-            child: championships.isEmpty
+            child: campeonatos.isEmpty
                 ? Center(
               child: Text(
                 'Nenhum campeonato criado ainda.',
@@ -85,9 +96,9 @@ class _MeusCampeonatosViewState extends State<MeusCampeonatosView> {
             )
                 : ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: championships.length,
+              itemCount: campeonatos.length,
               itemBuilder: (context, index) {
-                final item = championships[index];
+                final item = campeonatos[index];
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
@@ -110,14 +121,14 @@ class _MeusCampeonatosViewState extends State<MeusCampeonatosView> {
                       ),
                     ),
                     title: Text(
-                      item.title,
+                      item['nome'] ?? 'Campeonato',
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     subtitle: Text(
-                      item.subtitle,
+                      item['descricao'] ?? '',
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.6),
                       ),
@@ -132,7 +143,7 @@ class _MeusCampeonatosViewState extends State<MeusCampeonatosView> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${item.followersCount} seguidores',
+                          '${item['seguidores'] ?? 0} seguidores',
                           style: const TextStyle(
                             color: Colors.white54,
                             fontSize: 10,
@@ -149,16 +160,4 @@ class _MeusCampeonatosViewState extends State<MeusCampeonatosView> {
       ),
     );
   }
-}
-
-class ChampionshipItem {
-  final String title;
-  final String subtitle;
-  final int followersCount;
-
-  ChampionshipItem({
-    required this.title,
-    required this.subtitle,
-    required this.followersCount,
-  });
 }
