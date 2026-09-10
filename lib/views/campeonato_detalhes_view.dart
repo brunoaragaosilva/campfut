@@ -1,548 +1,512 @@
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 import '../models/campeonato_models.dart';
+import 'partidas_tab.dart';
+import 'classificacao_tab.dart';
 
 class CampeonatoDetalhesView extends StatefulWidget {
-  const CampeonatoDetalhesView({super.key, required this.campeonato});
-
   final Campeonato campeonato;
+
+  const CampeonatoDetalhesView({super.key, required this.campeonato});
 
   @override
   State<CampeonatoDetalhesView> createState() => _CampeonatoDetalhesViewState();
 }
 
-class _CampeonatoDetalhesViewState extends State<CampeonatoDetalhesView> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  
-  // Agora as listas começam completamente vazias para você controlar tudo!
-  final List<Time> _times = [];
-  final List<Jogo> _jogos = [];
-  
-  final Uuid _uuid = const Uuid();
-  final TextEditingController _nomeTimeController = TextEditingController();
-  final TextEditingController _nomeJogadorController = TextEditingController();
-  final TextEditingController _golsCasaController = TextEditingController();
-  final TextEditingController _golsForaController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+class _CampeonatoDetalhesViewState extends State<CampeonatoDetalhesView> {
+  void _atualizar() {
+    setState(() {});
   }
 
-  @override
-  void dispose() {
-    _tabController.dispose();
-    _nomeTimeController.dispose();
-    _nomeJogadorController.dispose();
-    _golsCasaController.dispose();
-    _golsForaController.dispose();
-    super.dispose();
+  // Modal original para cadastrar equipe
+  void _modalAdicionarTime() {
+    final nomeController = TextEditingController();
+    final fundacaoController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Cadastrar Nova Equipe'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nomeController,
+              decoration: const InputDecoration(
+                labelText: 'Nome da Equipe',
+                hintText: 'Ex: Flamengo',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: fundacaoController,
+              decoration: const InputDecoration(
+                labelText: 'Ano de Fundação / Bairro (Opcional)',
+                hintText: 'Ex: 1895',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('CANCELAR'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (nomeController.text.trim().isEmpty) return;
+              final novoTime = Time(
+                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                nome: nomeController.text.trim(),
+                fundacao: fundacaoController.text.trim(),
+                jogadores: [],
+              );
+              setState(() {
+                widget.campeonato.times.add(novoTime);
+              });
+              Navigator.pop(ctx);
+            },
+            child: const Text('CADASTRAR'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // MODAL DE ATLETA COMPLETO E ATUALIZADO (Mantendo o layout do app e inserindo os novos campos)
+  void _modalSalvarJogador(Time time, {Jogador? jogadorExistente}) {
+    final isEdicao = jogadorExistente != null;
+    final nomeController = TextEditingController(text: jogadorExistente?.nome ?? '');
+    final apelidoController = TextEditingController(text: jogadorExistente?.apelido ?? '');
+    final posicaoController = TextEditingController(text: jogadorExistente?.posicao ?? '');
+    final numeroController = TextEditingController(
+        text: jogadorExistente != null && jogadorExistente.numeroCamisa > 0
+            ? jogadorExistente.numeroCamisa.toString()
+            : '');
+    final documentoController = TextEditingController(text: jogadorExistente?.documento ?? '');
+    final dataNascimentoController = TextEditingController(text: jogadorExistente?.dataNascimento ?? '');
+    final telefoneController = TextEditingController(text: jogadorExistente?.telefone ?? '');
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Ícone de Fechar (X)
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    icon: const Icon(Icons.close, size: 22),
+                    onPressed: () => Navigator.pop(ctx),
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // Foto 200x240 + Nome + Apelido
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 85,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(Icons.add, color: Colors.black54, size: 20),
+                          SizedBox(height: 2),
+                          Text(
+                            '200x240',
+                            style: TextStyle(fontSize: 11, color: Colors.black54),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          TextField(
+                            controller: nomeController,
+                            decoration: const InputDecoration(
+                              labelText: 'Nome do jogador',
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          TextField(
+                            controller: apelidoController,
+                            decoration: const InputDecoration(
+                              labelText: 'Apelido',
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+
+                // Posição
+                TextField(
+                  controller: posicaoController,
+                  decoration: const InputDecoration(
+                    labelText: 'Posição do jogador',
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // Nº da camisa/registro + Documento
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: numeroController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'Nº da camisa/registro',
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: documentoController,
+                        decoration: const InputDecoration(
+                          labelText: 'Documento',
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+
+                // Data de nascimento + Telefone
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: dataNascimentoController,
+                        decoration: const InputDecoration(
+                          labelText: 'Data de nascimento',
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: telefoneController,
+                        keyboardType: TextInputType.phone,
+                        decoration: const InputDecoration(
+                          labelText: 'Telefone',
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+
+                // Estatísticas e Transferência
+                const Divider(height: 1),
+                ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.show_chart, color: Colors.green, size: 20),
+                  title: const Text('Estatísticas do campeonato',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                  onTap: () {},
+                ),
+                ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.swap_horiz, color: Colors.teal, size: 20),
+                  title: const Text('Transferir jogador',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                  subtitle: Text('Desde: ${jogadorExistente?.dataEntrada ?? "09/09/2026"}',
+                      style: const TextStyle(fontSize: 11)),
+                  onTap: () {},
+                ),
+                const SizedBox(height: 12),
+
+                // Botões do Rodapé (Remover e Salvar)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        if (isEdicao) {
+                          setState(() {
+                            time.jogadores.remove(jogadorExistente);
+                          });
+                        }
+                        Navigator.pop(ctx);
+                      },
+                      child: const Text('Remover', style: TextStyle(color: Colors.red, fontSize: 15)),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        if (nomeController.text.trim().isEmpty) return;
+
+                        setState(() {
+                          if (isEdicao) {
+                            jogadorExistente.nome = nomeController.text.trim();
+                            jogadorExistente.apelido = apelidoController.text.trim();
+                            jogadorExistente.posicao = posicaoController.text.trim();
+                            jogadorExistente.numeroCamisa = int.tryParse(numeroController.text) ?? 0;
+                            jogadorExistente.documento = documentoController.text.trim();
+                            jogadorExistente.dataNascimento = dataNascimentoController.text.trim();
+                            jogadorExistente.telefone = telefoneController.text.trim();
+                          } else {
+                            time.jogadores.add(
+                              Jogador(
+                                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                                nome: nomeController.text.trim(),
+                                apelido: apelidoController.text.trim(),
+                                posicao: posicaoController.text.trim(),
+                                numeroCamisa: int.tryParse(numeroController.text) ?? 0,
+                                documento: documentoController.text.trim(),
+                                dataNascimento: dataNascimentoController.text.trim(),
+                                telefone: telefoneController.text.trim(),
+                              ),
+                            );
+                          }
+                        });
+                        Navigator.pop(ctx);
+                      },
+                      child: const Text('Salvar',
+                          style: TextStyle(color: Colors.blue, fontSize: 15, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Cálculo da Artilharia
+  List<Map<String, dynamic>> _calcularArtilharia() {
+    final Map<String, Map<String, dynamic>> artilheirosMap = {};
+
+    for (var p in widget.campeonato.partidas) {
+      if (p.finalizada) {
+        for (var ev in p.eventos) {
+          if (ev.tipo == 'gol') {
+            final key = '${ev.nomeJogador}_${ev.timeId}';
+            if (!artilheirosMap.containsKey(key)) {
+              final timeObj = widget.campeonato.times.firstWhere(
+                (t) => t.id == ev.timeId,
+                orElse: () => Time(id: '', nome: 'Time Desconhecido', fundacao: '', jogadores: []),
+              );
+              artilheirosMap[key] = {
+                'nome': ev.nomeJogador,
+                'time': timeObj.nome,
+                'gols': 0,
+              };
+            }
+            artilheirosMap[key]!['gols'] = (artilheirosMap[key]!['gols'] as int) + 1;
+          }
+        }
+      }
+    }
+
+    final lista = artilheirosMap.values.toList();
+    lista.sort((a, b) => (b['gols'] as int).compareTo(a['gols'] as int));
+    return lista;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.campeonato.nome.toUpperCase()),
-        backgroundColor: const Color(0xFF0F172A),
-        foregroundColor: Colors.white,
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.grey,
-          indicatorColor: Colors.white,
-          tabs: const [
-            Tab(icon: Icon(Icons.emoji_events), text: "Formato"),
-            Tab(icon: Icon(Icons.table_rows), text: "Classificação"),
-            Tab(icon: Icon(Icons.sports_soccer), text: "Jogos"),
-            Tab(icon: Icon(Icons.people), text: "Times"),
-            Tab(icon: Icon(Icons.star), text: "Artilharia"),
-          ],
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildFormatoView(),
-          _buildClassificacaoView(),
-          _buildJogosView(),
-          _buildTimesView(),
-          _buildArtilhariaView(),
-        ],
-      ),
-    );
-  }
+    final artilharia = _calcularArtilharia();
 
-  Widget _buildFormatoView() {
-    return const Center(child: Text("Configurações do Formato do Campeonato"));
-  }
-
-  // --- TABELA DE CLASSIFICAÇÃO AUTOMÁTICA ---
-  Widget _buildClassificacaoView() {
-    if (_times.isEmpty) {
-      return const Center(child: Text("Cadastre times na aba 'Times' para ver a classificação.", style: TextStyle(color: Colors.grey)));
-    }
-
-    List<LinhaClassificacaoAux> tabela = _times.map((t) => LinhaClassificacaoAux(time: t)).toList();
-
-    for (var jogo in _jogos) {
-      if (jogo.encerrado && jogo.golsCasa != null && jogo.golsFora != null) {
-        var linhaCasa = tabela.firstWhere((l) => l.time.id == jogo.timeCasa.id);
-        var linhaFora = tabela.firstWhere((l) => l.time.id == jogo.timeFora.id);
-
-        linhaCasa.jogos++;
-        linhaFora.jogos++;
-
-        if (jogo.golsCasa! > jogo.golsFora!) {
-          linhaCasa.pontos += 3;
-          linhaCasa.vitorias++;
-          linhaFora.derrotas++;
-        } else if (jogo.golsCasa! < jogo.golsFora!) {
-          linhaFora.pontos += 3;
-          linhaFora.vitorias++;
-          linhaCasa.derrotas++;
-        } else {
-          linhaCasa.pontos += 1;
-          linhaFora.pontos += 1;
-          linhaCasa.empates++;
-          linhaFora.empates++;
-        }
-      }
-    }
-
-    tabela.sort((a, b) => b.pontos.compareTo(a.pontos));
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16.0),
-      itemCount: tabela.length,
-      itemBuilder: (context, index) {
-        final item = tabela[index];
-        return Card(
-          elevation: 2,
-          margin: const EdgeInsets.symmetric(vertical: 6.0),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: const Color(0xFF0F172A),
-              foregroundColor: Colors.white,
-              child: Text("${index + 1}"),
-            ),
-            title: Text(item.time.nome, style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text("P: ${item.pontos} | J: ${item.jogos} | V: ${item.vitorias} | E: ${item.empates} | D: ${item.derrotas}"),
-          ),
-        );
-      },
-    );
-  }
-
-  // --- ABA DE JOGOS ---
-  Widget _buildJogosView() {
-    return Scaffold(
-      body: _jogos.isEmpty
-          ? const Center(child: Text("Nenhum jogo cadastrado nesta competição.", style: TextStyle(color: Colors.grey)))
-          : ListView.builder(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: _jogos.length,
-              itemBuilder: (context, index) {
-                final jogo = _jogos[index];
-                return Card(
-                  elevation: 2,
-                  margin: const EdgeInsets.only(bottom: 10),
-                  child: InkWell(
-                    onTap: () => _exibirDialogoPlacar(jogo),
-                    borderRadius: BorderRadius.circular(4),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(child: Text(jogo.timeCasa.nome, textAlign: TextAlign.right, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
-                          Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
-                            decoration: BoxDecoration(
-                              color: jogo.encerrado ? const Color(0xFF22C55E).withValues(alpha: 0.1) : Colors.grey[200],
-                              border: jogo.encerrado ? Border.all(color: const Color(0xFF22C55E)) : null,
-                              borderRadius: BorderRadius.circular(4.0),
-                            ),
-                            child: Text(
-                              jogo.encerrado ? "${jogo.golsCasa} x ${jogo.golsFora}" : "vs",
-                              style: TextStyle(fontWeight: FontWeight.bold, color: jogo.encerrado ? const Color(0xFF15803D) : Colors.black, fontSize: 16),
-                            ),
-                          ),
-                          Expanded(child: Text(jogo.timeFora.nome, textAlign: TextAlign.left, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF0F172A),
-        foregroundColor: Colors.white,
-        onPressed: _exibirDialogoAdicionarJogo,
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-
-  // --- ABA DE TIMES (COM CADASTRO DE JOGADORES) ---
-  Widget _buildTimesView() {
-    return Scaffold(
-      body: _times.isEmpty
-          ? const Center(child: Text("Nenhum time inscrito neste campeonato.", style: TextStyle(color: Colors.grey)))
-          : ListView.builder(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: _times.length,
-              itemBuilder: (context, index) {
-                final time = _times[index];
-                return Card(
-                  child: ExpansionTile(
-                    leading: const Icon(Icons.shield, color: Color(0xFF0F172A)),
-                    title: Text(time.nome, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text("${time.jogadores.length} jogadores inscritos"),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.person_add, color: Color(0xFF0F172A)),
-                      onPressed: () => _exibirDialogoAdicionarJogador(time),
-                    ),
-                    children: time.jogadores.isEmpty 
-                      ? [const Padding(padding: EdgeInsets.all(8.0), child: Text("Nenhum jogador neste elenco", style: TextStyle(color: Colors.grey, fontSize: 12)))]
-                      : time.jogadores.map((j) => ListTile(
-                          dense: true,
-                          leading: const Icon(Icons.person, size: 18),
-                          title: Text(j.nome),
-                          trailing: Text("${j.gols} gols", style: const TextStyle(color: Colors.grey)),
-                        )).toList(),
-                  ),
-                );
-              },
-            ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF0F172A),
-        foregroundColor: Colors.white,
-        onPressed: _exibirDialogoAdicionarTime,
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-
-  // --- TABELA DE ARTILHARIA REAL ---
-  Widget _buildArtilhariaView() {
-    List<Map<String, dynamic>> listaArtilheiros = [];
-    
-    for (var time in _times) {
-      for (var jogador in time.jogadores) {
-        if (jogador.gols > 0) {
-          listaArtilheiros.add({
-            'nome': jogador.nome,
-            'time': time.nome,
-            'gols': jogador.gols,
-          });
-        }
-      }
-    }
-
-    listaArtilheiros.sort((a, b) => b['gols'].compareTo(a['gols']));
-
-    if (listaArtilheiros.isEmpty) {
-      return const Center(child: Text("Nenhum gol marcado no campeonato ainda.", style: TextStyle(color: Colors.grey)));
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16.0),
-      itemCount: listaArtilheiros.length,
-      itemBuilder: (context, index) {
-        final artilheiro = listaArtilheiros[index];
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 4.0),
-          child: ListTile(
-            leading: Text("${index + 1}º", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
-            title: Text(artilheiro['nome'], style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text(artilheiro['time'], style: const TextStyle(color: Colors.grey)),
-            trailing: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(color: const Color(0xFF0F172A), borderRadius: BorderRadius.circular(20)),
-              child: Text("${artilheiro['gols']} Gols", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  // --- DIÁLOGOS DE CADASTRO ---
-
-  void _exibirDialogoAdicionarTime() {
-    _nomeTimeController.clear();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Adicionar Time"),
-        content: TextField(controller: _nomeTimeController, decoration: const InputDecoration(labelText: "Nome do Time"), autofocus: true),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancelar")),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F172A)),
-            onPressed: () {
-              if (_nomeTimeController.text.trim().isNotEmpty) {
-                setState(() {
-                  _times.add(Time(id: _uuid.v4(), nome: _nomeTimeController.text.trim()));
-                });
-                Navigator.pop(context);
-              }
-            },
-            child: const Text("Salvar", style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _exibirDialogoAdicionarJogador(Time time) {
-    _nomeJogadorController.clear();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text("Inscrição no ${time.nome}"),
-        content: TextField(controller: _nomeJogadorController, decoration: const InputDecoration(labelText: "Nome do Jogador"), autofocus: true),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancelar")),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F172A)),
-            onPressed: () {
-              if (_nomeJogadorController.text.trim().isNotEmpty) {
-                setState(() {
-                  time.jogadores.add(Jogador(id: _uuid.v4(), nome: _nomeJogadorController.text.trim()));
-                });
-                Navigator.pop(context);
-              }
-            },
-            child: const Text("Adicionar", style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _exibirDialogoAdicionarJogo() {
-    if (_times.length < 2) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Aviso"),
-          content: const Text("Cadastre pelo menos 2 times para criar um jogo."),
-          actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text("Entendi"))],
-        ),
-      );
-      return;
-    }
-
-    Time? timeCasaSelecionado = _times[0];
-    Time? timeForaSelecionado = _times[1];
-
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setPopupState) => AlertDialog(
-          title: const Text("Novo Confronto"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              DropdownButton<Time>(
-                value: timeCasaSelecionado,
-                isExpanded: true,
-                items: _times.map((t) => DropdownMenuItem(value: t, child: Text(t.nome))).toList(),
-                onChanged: (v) => setPopupState(() => timeCasaSelecionado = v),
-              ),
-              const Padding(padding: EdgeInsets.symmetric(vertical: 8.0), child: Text("VS")),
-              DropdownButton<Time>(
-                value: timeForaSelecionado,
-                isExpanded: true,
-                items: _times.map((t) => DropdownMenuItem(value: t, child: Text(t.nome))).toList(),
-                onChanged: (v) => setPopupState(() => timeForaSelecionado = v),
-              ),
+    return DefaultTabController(
+      length: 5,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.campeonato.nome),
+          bottom: const TabBar(
+            isScrollable: true,
+            tabs: [
+              Tab(icon: Icon(Icons.sports_soccer), text: 'Partidas'),
+              Tab(icon: Icon(Icons.table_chart), text: 'Classificação'),
+              Tab(icon: Icon(Icons.groups), text: 'Equipes & Atletas'),
+              Tab(icon: Icon(Icons.emoji_events), text: 'Artilharia'),
+              Tab(icon: Icon(Icons.info_outline), text: 'Informações'),
             ],
           ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancelar")),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F172A)),
-              onPressed: () {
-                if (timeCasaSelecionado == timeForaSelecionado) return;
-                setState(() {
-                  _jogos.add(Jogo(id: _uuid.v4(), timeCasa: timeCasaSelecionado!, timeFora: timeForaSelecionado!));
-                });
-                Navigator.pop(context);
-              },
-              child: const Text("Criar", style: TextStyle(color: Colors.white)),
-            ),
-          ],
         ),
-      ),
-    );
-  }
-
-  // --- LANÇAR PLACAR E DISTRIBUIR GOLS ---
-  void _exibirDialogoPlacar(Jogo jogo) {
-    _golsCasaController.text = jogo.golsCasa?.toString() ?? "";
-    _golsForaController.text = jogo.golsFora?.toString() ?? "";
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Informar Placar", textAlign: TextAlign.center),
-        content: Row(
-          mainAxisSize: MainAxisSize.min,
+        body: TabBarView(
           children: [
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(jogo.timeCasa.nome, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  TextField(controller: _golsCasaController, keyboardType: TextInputType.number, textAlign: TextAlign.center),
-                ],
-              ),
+            // 1. PARTIDAS
+            PartidasTab(
+              campeonato: widget.campeonato,
+              onDataChanged: _atualizar,
             ),
-            const Padding(padding: EdgeInsets.all(12.0), child: Text("X")),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(jogo.timeFora.nome, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  TextField(controller: _golsForaController, keyboardType: TextInputType.number, textAlign: TextAlign.center),
-                ],
+
+            // 2. CLASSIFICAÇÃO
+            ClassificacaoTab(campeonato: widget.campeonato),
+
+            // 3. EQUIPES & ATLETAS (Estrutura original com botão de Nova Equipe e lista expandível)
+            Scaffold(
+              floatingActionButton: FloatingActionButton.extended(
+                onPressed: _modalAdicionarTime,
+                icon: const Icon(Icons.add),
+                label: const Text('Nova Equipe'),
               ),
+              body: widget.campeonato.times.isEmpty
+                  ? const Center(
+                      child: Text('Nenhuma equipe cadastrada.\nClique em "+ Nova Equipe" para adicionar.'),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(12),
+                      itemCount: widget.campeonato.times.length,
+                      itemBuilder: (ctx, i) {
+                        final time = widget.campeonato.times[i];
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          child: ExpansionTile(
+                            leading: const CircleAvatar(
+                              child: Icon(Icons.shield),
+                            ),
+                            title: Text(
+                              time.nome,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Text(
+                              'Fundação/Bairro: ${time.fundacao.isEmpty ? "N/I" : time.fundacao} • ${time.jogadores.length} atletas',
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.person_add, color: Colors.indigo),
+                              tooltip: 'Adicionar Atleta',
+                              onPressed: () => _modalSalvarJogador(time),
+                            ),
+                            children: [
+                              if (time.jogadores.isEmpty)
+                                const Padding(
+                                  padding: EdgeInsets.all(12.0),
+                                  child: Text('Nenhum atleta cadastrado neste time.',
+                                      style: TextStyle(color: Colors.grey)),
+                                )
+                              else
+                                ...time.jogadores.map(
+                                  (j) => ListTile(
+                                    dense: true,
+                                    leading: CircleAvatar(
+                                      radius: 12,
+                                      child: Text(
+                                        j.numeroCamisa > 0 ? '${j.numeroCamisa}' : 'J',
+                                        style: const TextStyle(fontSize: 10),
+                                      ),
+                                    ),
+                                    title: Text(j.nome, style: const TextStyle(fontWeight: FontWeight.w500)),
+                                    subtitle: Text(j.posicao.isEmpty ? 'Sem posição definida' : j.posicao),
+                                    onTap: () => _modalSalvarJogador(time, jogadorExistente: j),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
             ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancelar")),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F172A)),
-            onPressed: () {
-              final int? gc = int.tryParse(_golsCasaController.text);
-              final int? gf = int.tryParse(_golsForaController.text);
 
-              if (gc != null && gf != null) {
-                Navigator.pop(context);
-                _exibirDialogoQuemFezOsGols(jogo, gc, gf);
-              }
-            },
-            child: const Text("Próximo", style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
+            // 4. ARTILHARIA
+            artilharia.isEmpty
+                ? const Center(
+                    child: Text('Nenhum gol registrado até o momento.'),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(12),
+                    itemCount: artilharia.length,
+                    itemBuilder: (ctx, index) {
+                      final item = artilharia[index];
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: index == 0 ? Colors.amber : Colors.grey.shade300,
+                          child: Text(
+                            '${index + 1}º',
+                            style: TextStyle(
+                              color: index == 0 ? Colors.black : Colors.black87,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        title: Text(item['nome'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                        subtitle: Text(item['time']),
+                        trailing: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.indigo.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${item['gols']} gol(s)',
+                            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
 
-  void _exibirDialogoQuemFezOsGols(Jogo jogo, int golsCasa, int golsFora) {
-    List<String> temporarioArtilheiros = [];
-
-    // Junta os jogadores que podem ter marcado gols nesse jogo
-    List<Jogador> jogadoresDisponiveis = [...jogo.timeCasa.jogadores, ...jogo.timeFora.jogadores];
-
-    if (jogadoresDisponiveis.isEmpty || (golsCasa == 0 && golsFora == 0)) {
-      // Se não há jogadores cadastrados ou o jogo foi 0x0, salva direto
-      _salvarPartidaFim(jogo, golsCasa, golsFora, []);
-      return;
-    }
-
-    int totalGolsEsperados = golsCasa + golsFora;
-
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setPopupState) => AlertDialog(
-          title: Text("Quem fez os $totalGolsEsperados gols?"),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: jogadoresDisponiveis.length,
-              itemBuilder: (context, i) {
-                final jog = jogadoresDisponiveis[i];
-                int quantosDesse = temporarioArtilheiros.where((id) => id == jog.id).length;
-
-                return ListTile(
-                  title: Text(jog.nome),
-                  subtitle: Text(jogo.timeCasa.jogadores.contains(jog) ? jogo.timeCasa.nome : jogo.timeFora.nome),
-                  trailing: Row(
+            // 5. INFORMAÇÕES
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
-                        onPressed: quantosDesse > 0 ? () => setPopupState(() => temporarioArtilheiros.remove(jog.id)) : null,
+                      Text(
+                        widget.campeonato.nome,
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                       ),
-                      Text("$quantosDesse", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                      IconButton(
-                        icon: const Icon(Icons.add_circle_outline, color: Colors.green),
-                        onPressed: temporarioArtilheiros.length < totalGolsEsperados 
-                          ? () => setPopupState(() => temporarioArtilheiros.add(jog.id)) 
-                          : null,
-                      ),
+                      const Divider(),
+                      const SizedBox(height: 8),
+                      Text('Organizador: ${widget.campeonato.organizador}'),
+                      const SizedBox(height: 6),
+                      Text('Modalidade: ${widget.campeonato.modalidade.nomeExibicao}'),
+                      const SizedBox(height: 6),
+                      Text('Modelo do Campeonato: ${widget.campeonato.modelo.nomeExibicao}'),
+                      const SizedBox(height: 6),
+                      Text('Total de Equipes: ${widget.campeonato.times.length}'),
+                      const SizedBox(height: 6),
+                      Text('Total de Partidas: ${widget.campeonato.partidas.length}'),
                     ],
                   ),
-                );
-              },
-            ),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text("Voltar")),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F172A)),
-              onPressed: temporarioArtilheiros.length == totalGolsEsperados
-                ? () {
-                    _salvarPartidaFim(jogo, golsCasa, golsFora, temporarioArtilheiros);
-                    Navigator.pop(context);
-                  }
-                : null, // Só deixa salvar se distribuir todos os gols digitados no placar
-              child: const Text("Finalizar", style: TextStyle(color: Colors.white)),
+                ),
+              ),
             ),
           ],
         ),
       ),
     );
   }
-
-  void _salvarPartidaFim(Jogo jogo, int gc, int gf, List<String> artilheirosDoJogo) {
-    setState(() {
-      // 1. Remove gols antigos se for uma reedição de placar
-      for (var id in jogo.idArtilheiros) {
-        for (var t in _times) {
-          for (var j in t.jogadores) {
-            if (j.id == id) j.gols--;
-          }
-        }
-      }
-
-      // 2. Salva o novo placar
-      jogo.golsCasa = gc;
-      jogo.golsFora = gf;
-      jogo.encerrado = true;
-      jogo.idArtilheiros.clear();
-      jogo.idArtilheiros.addAll(artilheirosDoJogo);
-
-      // 3. Computa os gols novos para os jogadores correspondentes
-      for (var id in artilheirosDoJogo) {
-        for (var t in _times) {
-          for (var j in t.jogadores) {
-            if (j.id == id) j.gols++;
-          }
-        }
-      }
-    });
-  }
-}
-
-class LinhaClassificacaoAux {
-  final Time time;
-  int pontos = 0;
-  int jogos = 0;
-  int vitorias = 0;
-  int empates = 0;
-  int derrotas = 0;
-
-  LinhaClassificacaoAux({required this.time});
 }

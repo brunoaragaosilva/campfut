@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
-import 'app_theme.dart';
 import 'views/dashboard_view.dart';
 
 void main() {
-  runApp(const CampFutApp());
+  runApp(const MyApp());
 }
 
-class CampFutApp extends StatelessWidget {
-  const CampFutApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Campfut',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
+      title: 'Gerenciador de Campeonatos',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
       home: const DashboardView(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
