@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'views/login_view.dart'; // Mantém o caminho do arquivo onde está a sua LoginScreen
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -9,9 +10,9 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    print("Firebase inicializado!");
+    print("Firebase inicializado com sucesso!");
   } catch (e) {
-    print("Aviso: Firebase rodando com chaves temporárias.");
+    print("Erro ao inicializar o Firebase: $e");
   }
 
   runApp(const MyApp());
@@ -24,16 +25,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'CampFut',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.green),
-      home: const Scaffold(
-        body: Center(
-          child: Text(
-            'O App CampFut compilou com sucesso!\nFirebase estruturado.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ),
-      ),
+      home: const LoginScreen(), // Corrigido para chamar a classe correta
     );
   }
 }

@@ -139,7 +139,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       GoogleAuthProvider googleProvider = GoogleAuthProvider();
-      // Executa o popup de login com Google otimizado para Web / GitHub Pages
       await _auth.signInWithPopup(googleProvider);
 
       if (!mounted) return;
@@ -161,7 +160,6 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: const Color(0xFF0F172A),
       body: Column(
         children: [
-          // Barra Superior original
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             color: const Color(0xFF0B132B),
@@ -196,8 +194,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
             ),
           ),
-
-          // Container Central de Login
           Expanded(
             child: Center(
               child: SingleChildScrollView(
@@ -369,13 +365,11 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-
-          // Rodapé original
           Container(
             padding: const EdgeInsets.all(12),
-            child: const Text(
+            child: Text(
               'ORGANIZAÇÃO - TÁTICA - REGRAS - ADMINISTRAÇÃO',
-              style: TextStyle(color: Colors.white67, fontSize: 11, letterSpacing: 1.2),
+              style: TextStyle(color: Colors.white.withOpacity(0.67), fontSize: 11, letterSpacing: 1.2),
             ),
           ),
         ],
