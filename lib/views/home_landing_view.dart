@@ -20,6 +20,7 @@ class _HomeLandingViewState extends State<HomeLandingView> {
 
     showDialog(
       context: context,
+      barrierDismissible: false, // Evita fechar o modal sem querer ao clicar fora
       builder: (ctx) {
         return StatefulBuilder(
           builder: (context, setModalState) {
@@ -29,30 +30,42 @@ class _HomeLandingViewState extends State<HomeLandingView> {
                 borderRadius: BorderRadius.circular(16),
               ),
               child: SingleChildScrollView(
-                child: Padding(
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 400), // Mantém o modal elegante em telas grandes/web
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF0A1D44),
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(12),
-                            topRight: Radius.circular(12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const SizedBox(width: 48), // Espaçador para centralizar o título
+                          Container(
+                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF0A1D44),
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(12),
+                                topRight: Radius.circular(12),
+                                bottomLeft: Radius.circular(12),
+                                bottomRight: Radius.circular(12),
+                              ),
+                            ),
+                            child: const Text(
+                              'Login',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
-                        ),
-                        child: const Text(
-                          'Login',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                          IconButton(
+                            icon: const Icon(Icons.close, color: Colors.black54),
+                            onPressed: () => Navigator.pop(ctx),
                           ),
-                        ),
+                        ],
                       ),
                       const SizedBox(height: 16),
                       TextField(
@@ -75,12 +88,14 @@ class _HomeLandingViewState extends State<HomeLandingView> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 24),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           GestureDetector(
-                            onTap: () {},
+                            onTap: () {
+                              // Lógica para ir para tela de criar conta futuramente
+                            },
                             child: const Text(
                               'Criar conta',
                               style: TextStyle(
@@ -101,6 +116,7 @@ class _HomeLandingViewState extends State<HomeLandingView> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text('Aceite os termos para continuar.'),
+                                    backgroundColor: Colors.red,
                                   ),
                                 );
                                 return;
@@ -116,14 +132,17 @@ class _HomeLandingViewState extends State<HomeLandingView> {
                                 ),
                               );
                             },
-                            child: const Text(
-                              'Login',
-                              style: TextStyle(color: Colors.white),
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 16.0),
+                              child: Text(
+                                'Login',
+                                style: TextStyle(color: Colors.white),
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
                       OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
                           minimumSize: const Size.fromHeight(40),
@@ -139,13 +158,13 @@ class _HomeLandingViewState extends State<HomeLandingView> {
                         ),
                         onPressed: () {},
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       const Text(
                         'Termos e condições de uso\nPolítica de privacidade',
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Color(0xFF00838F), fontSize: 11),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                       Row(
                         children: [
                           Checkbox(
@@ -191,11 +210,12 @@ class _HomeLandingViewState extends State<HomeLandingView> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: const [
-            Text('CAMPFUT', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            Text('CAMPFUT', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white)),
             SizedBox(width: 4),
-            Icon(Icons.sports_soccer, size: 18),
+            Icon(Icons.sports_soccer, size: 18, color: Colors.white),
           ],
         ),
+        iconTheme: const IconThemeData(color: Colors.white), // Garante que o ícone do menu (hamburguer) fique branco
         actions: [
           TextButton.icon(
             onPressed: _abrirModalLogin,
@@ -226,7 +246,7 @@ class _HomeLandingViewState extends State<HomeLandingView> {
                 'assets/images/logo_campfut.png',
                 height: 210,
                 errorBuilder: (ctx, err, stack) => const Icon(
-                  Icons.emoji_events,
+                  Icons.shield,
                   size: 140,
                   color: Color(0xFF00BCD4),
                 ),
@@ -235,9 +255,9 @@ class _HomeLandingViewState extends State<HomeLandingView> {
             const SizedBox(height: 28),
             RichText(
               textAlign: TextAlign.center,
-              text: TextSpan(
+              text: const TextSpan(
                 style: baseStyle,
-                children: const [
+                children: [
                   TextSpan(
                     text: 'GESTÃO DE ',
                     style: TextStyle(color: Colors.white),

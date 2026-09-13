@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'views/login_view.dart'; // Mantém o caminho do arquivo onde está a sua LoginScreen
+import 'views/home_landing_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    print("Firebase inicializado com sucesso!");
   } catch (e) {
-    print("Erro ao inicializar o Firebase: $e");
+    debugPrint("Erro Firebase: $e");
   }
-
   runApp(const MyApp());
 }
 
@@ -26,8 +23,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'CampFut',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.green),
-      home: const LoginScreen(), // Corrigido para chamar a classe correta
+      theme: ThemeData(
+        scaffoldBackgroundColor: const Color(0xFF0F172A), // Fundo escuro do protótipo
+        primaryColor: const Color(0xFF0B132B),
+      ),
+      home: const HomeLandingView(),
     );
   }
 }
